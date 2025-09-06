@@ -11,15 +11,36 @@ public class PlayerController : MonoBehaviour
     private bool goJump = false;        // 점프 개시 플래그
     private bool onGround = false;      // 지면에 서 있는 플래그
 
+    // 애니메이션 처리
+    private Animator animator = null;       // 애니메이터
+    public string stopAnime = "PlayerStop"; // 대기 애니메이션
+    public string moveAnime = "PlayerMove"; // 이동 애니메이션
+    public string jumpAnime = "PlayerJump"; // 점프 애니메이션
+    public string goalAnime = "PlayerGoal"; // 클리어 애니메이션
+    public string deadAnime = "PlayerOver"; // 게임오버 애니메이션
+    private string nowAnime = ""; // 현재 재생 중인 애니메이션
+    private string oldAnime = ""; // 이전에 재생 중이던 애니메이션
+
+    public static string gameState = "playing"; // 게임 상태
 
     private void Start()
     {
         // 스크립트가 있는 게임 오브젝트의 Rigidbody2D 컴포넌트를 가져와 rbody 변수에 할당
         rbody = GetComponent<Rigidbody2D>();
+
+        // Animator 가져오기
+        animator = GetComponent<Animator>();
+        nowAnime = stopAnime; // 초기 애니메이션 설정
+        oldAnime = stopAnime;
+
+        gameState = "playing"; // 게임 상태 초기화 (게임중)
     }
 
     private void Update()
     {
+        if (gameState != "playing")
+            return; // 게임 상태가 "playing"이 아니면 업데이트 중지
+
         axisH = Input.GetAxis("Horizontal");    // 수평 입력 값을 axisH 변수에 저장
 
         // 방향 조절
@@ -44,6 +65,9 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (gameState != "playing")
+            return; // 게임 상태가 "playing"이 아니면 업데이트 중지
+
         // 착지 판정
         onGround = Physics2D.Linecast(transform.position,
             transform.position - (transform.up * 0.1f),
@@ -62,11 +86,77 @@ public class PlayerController : MonoBehaviour
             rbody.AddForce(jumpPw, ForceMode2D.Impulse); // 순간적인 힘 적용
             goJump = false; // 점프 개시 플래그 해제
         }
+
+        if(onGround)
+        {
+            // 지면 위
+            if( axisH == 0.0f)
+            {
+                nowAnime = stopAnime; // 대기 애니메이션
+            }
+            else
+            {
+                nowAnime = moveAnime; // 이동 애니메이션
+            }
+        }
+        else
+        {
+            // 공중
+            nowAnime = jumpAnime; // 점프 애니메이션
+        }
+
+        if( nowAnime != oldAnime )
+        {
+            oldAnime = nowAnime;        // 이전 애니메이션 갱신
+            animator.Play(nowAnime);    // 애니메이션 변경            
+        }
     }
 
     public void Jump()
     {
         goJump = true;  // 점프 개시 플래그 설정
         Debug.Log("점프눌림!");
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Goal")
+        {
+            Goal();
+        }
+        else
+        {
+            if (collision.gameObject.tag == "Dead")
+            {
+                GameOver();
+            }
+        }
+
+    }
+
+    public void Goal()
+    {
+        animator.Play(goalAnime); // 클리어 애니메이션 재생
+
+        gameState = "gameclear"; // 게임 상태 변경 (게임 클리어)
+        GameStop(); // 게임 정지
+    }
+
+    public void GameOver()
+    {
+        animator.Play(deadAnime); // 게임오버 애니메이션 재생        
+
+        gameState = "gameover"; // 게임 상태 변경 (게임 오버)
+        GameStop(); // 게임 정지
+
+        GetComponent<CapsuleCollider2D>().enabled = false; // 충돌 비활성화
+        // 위로 튕겨 오르게 하는 연출
+        rbody.AddForce(new Vector2(0.0f, 5.0f), ForceMode2D.Impulse); 
+    }
+
+    private void GameStop()
+    {
+        Rigidbody2D rbody = GetComponent<Rigidbody2D>();
+        rbody.linearVelocity = new Vector2(0.0f, 0.0f); // 속도 0으로 강제 정지
     }
 }

@@ -3,9 +3,14 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rbody = null;   // Rigidbody2D 변수
-    private float axisH = 0.0f;         // 수평 입력 값
+    private float axisH = 0.0f;         // 수평 입력 값                                        
+    public float speed = 3.0f;          // 이동 속도
 
-    private float speed = 3.0f;          // 이동 속도
+    public float jump = 9.0f;           // 점프력
+    public LayerMask groundLayer;       // 착지할수 있는 레이어
+    private bool goJump = false;        // 점프 개시 플래그
+    private bool onGround = false;      // 지면에 서 있는 플래그
+
 
     private void Start()
     {
@@ -17,26 +22,51 @@ public class PlayerController : MonoBehaviour
     {
         axisH = Input.GetAxis("Horizontal");    // 수평 입력 값을 axisH 변수에 저장
 
-        Debug.Log("axisH: " + axisH);  // 수평 입력 값 출력
         // 방향 조절
         if (axisH > 0.0f)   // 오른쪽 이동
         {
-            Debug.Log("오른쪽 이동");
+            //Debug.Log("오른쪽 이동");
             transform.localScale = new Vector2(1.0f, 1.0f);
-            //GetComponent<SpriteRenderer>().flipX = false; // 좌우 반전 해제
         }
         else if (axisH < 0.0f)  // 왼쪽 이동
         {
-            Debug.Log("왼쪽 이동");
+            //Debug.Log("왼쪽 이동");
             transform.localScale = new Vector2(-1.0f, 1.0f);        // 좌우 반전
-            //GetComponent<SpriteRenderer>().flipX = true;  // 좌우 반전 적용
+        }
+
+        // 캐릭터 점프하기
+        //if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetButtonDown("Jump"))
+        {
+            Jump();
         }
     }
 
     private void FixedUpdate()
     {
-        // Rigidbody2D의 속도를 설정하여 플레이어 이동
-        //rbody.velocity = new Vector2(axisH * 3.0f, rbody.velocity.y);
-        rbody.linearVelocity = new Vector2(axisH * 3.0f, rbody.linearVelocity.y);
+        // 착지 판정
+        onGround = Physics2D.Linecast(transform.position,
+            transform.position - (transform.up * 0.1f),
+            groundLayer);
+
+        if (onGround || axisH != 0) // 지면 위 or 속도가 0이 아님 / 속도 갱신하기
+        {
+            rbody.linearVelocity = new Vector2(axisH * speed, rbody.linearVelocity.y);
+        }
+
+        if (onGround && goJump) // 지면 위에서 점프 키 눌림
+        {
+            Debug.Log("점프 개시!");
+            Vector2 jumpPw = new Vector2(0.0f, jump); // 점프력 벡터
+            // ForceMode2D.Impulse: 순간적인 힘 적용 , ForceMode2D.Force: 지속적인 힘 적용
+            rbody.AddForce(jumpPw, ForceMode2D.Impulse); // 순간적인 힘 적용
+            goJump = false; // 점프 개시 플래그 해제
+        }
+    }
+
+    public void Jump()
+    {
+        goJump = true;  // 점프 개시 플래그 설정
+        Debug.Log("점프눌림!");
     }
 }

@@ -22,6 +22,7 @@ public class TimeController : MonoBehaviour
     {
         if (isTimeOver == false)
         {
+            // time.deltaTime : 이전 프레임이 끝나고 현재 프레임이 시작될 때까지의 시간(초)
             times += Time.deltaTime;
             if (isCountDown)
             {

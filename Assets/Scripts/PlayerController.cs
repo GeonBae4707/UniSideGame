@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
     private string oldAnime = ""; // 이전에 재생 중이던 애니메이션
 
     public static string gameState = "playing"; // 게임 상태
-
+    public int score = 0; // 점수
 
     private void Start()
     {
@@ -120,12 +120,20 @@ public class PlayerController : MonoBehaviour
         {
             Goal();
         }
-        else
+        else if (collision.gameObject.tag == "Dead")
         {
-            if (collision.gameObject.tag == "Dead")
-            {
-                GameOver();
-            }
+            GameOver();
+        }
+        else if (collision.gameObject.tag == "ScoreItem")
+        {
+            // 점수 아이템
+            // ItemData 가져오기
+            ItemData item = collision.gameObject.GetComponent<ItemData>();
+            // 점수 얻기
+            score = item.value;
+            // 아이템 제거
+            Destroy(collision.gameObject);
+            Debug.Log("점수: " + score);
         }
     }
 

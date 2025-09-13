@@ -12,12 +12,27 @@ public class GameManager : MonoBehaviour
 
     Image titleImage;                   // 이미지를 표시하는 Image 컴포넌트
 
+    public GameObject timeBar;          // 시간 표시 이미지
+    public GameObject timeText;         // 시간 표시 텍스트
+    private TimeController timeCnt;     // TimeController
+
     private void Start()
     {
         // 이미지 숨기기
         Invoke("InactiveImage", 1.0f); // 1초 후 InactiveImage 함수 호출
         // 버튼(패널)을 숨기기
         panel.SetActive(false);
+
+        // TimeContoroller 가져오기
+        timeCnt = GetComponent<TimeController>();
+        if (timeCnt != null)
+        {
+            if (timeCnt.gameTime == 0.0f)
+            {
+                // 시간 제한이 없으면 시간 표시 숨기기
+                timeBar.SetActive(false);
+            }
+        }
     }
 
     private void Update()
@@ -32,6 +47,11 @@ public class GameManager : MonoBehaviour
             bt.interactable = false;    // 버튼 비활성화
             mainImage.GetComponent<Image>().sprite = gameClearSpr; // 게임 클리어 이미지 설정
             PlayerController.gameState = "gameend"; // 게임 종료
+
+            if (timeCnt != null)
+            {
+                timeCnt.isTimeOver = true;  // 시간 카운트 중지
+            }
         }
         else if (PlayerController.gameState == "gameover")
         {
@@ -43,10 +63,34 @@ public class GameManager : MonoBehaviour
             bt.interactable = false;    // 버튼 비활성화
             mainImage.GetComponent<Image>().sprite = gameOverSpr; // 게임 오버 이미지 설정
             PlayerController.gameState = "gameend"; // 게임 종료
+
+            if (timeCnt != null)
+            {
+                timeCnt.isTimeOver = true;  // 시간 카운트 중지
+            }
         }
         else if (PlayerController.gameState == "playing")
         {
             // 게임 중
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            // PlayerController 가져오기
+            PlayerController playerCnt = player.GetComponent<PlayerController>();
+            // 시간 갱신
+            if (timeCnt != null)
+            {
+                if (timeCnt.gameTime > 0.0f)
+                {
+                    // 정수에 할당하여 소수점 이하를 버림
+                    int time = (int)timeCnt.displayTime;
+                    // 시간 갱신
+                    timeText.GetComponent<Text>().text = time.ToString();
+                    // 타임오버
+                    if (time == 0)
+                    {
+                        playerCnt.GameOver(); // 게임 오버
+                    }
+                }
+            }
         }
     }
 

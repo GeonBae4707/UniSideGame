@@ -16,6 +16,10 @@ public class GameManager : MonoBehaviour
     public GameObject timeText;         // 시간 표시 텍스트
     private TimeController timeCnt;     // TimeController
 
+    public GameObject scoreText;        // 점수 표시 텍스트
+    public static int totalScore = 0;    // 총 점수
+    public int stageScore = 0;          // 스테이지 점수
+
     private void Start()
     {
         // 이미지 숨기기
@@ -33,6 +37,14 @@ public class GameManager : MonoBehaviour
                 timeBar.SetActive(false);
             }
         }
+
+        UpdateScore();
+    }
+
+    private void UpdateScore()
+    {
+        int score = stageScore + totalScore;
+        scoreText.GetComponent<Text>().text = score.ToString();
     }
 
     private void Update()
@@ -51,7 +63,15 @@ public class GameManager : MonoBehaviour
             if (timeCnt != null)
             {
                 timeCnt.isTimeOver = true;  // 시간 카운트 중지
+
+                // 정수에 할당하여 소수점을 버린다
+                int time = (int)timeCnt.displayTime;
+                totalScore += (time * 10); // 남은 시간 x 10 점수 추가
             }
+
+            totalScore += stageScore;   // 스테이지 점수를 총 점수에 추가
+            stageScore = 0;             // 스테이지 점수 초기화
+            UpdateScore(); // 점수 갱신
         }
         else if (PlayerController.gameState == "gameover")
         {
@@ -90,6 +110,13 @@ public class GameManager : MonoBehaviour
                         playerCnt.GameOver(); // 게임 오버
                     }
                 }
+            }
+
+            if (playerCnt.score != 0)
+            {
+                stageScore += playerCnt.score;  // 유저가 획득한 아이템을 스테이지 점수에 추가
+                playerCnt.score = 0;        // 유저가 획득한 아이템 점수 초기화
+                UpdateScore(); // 점수 갱신
             }
         }
     }

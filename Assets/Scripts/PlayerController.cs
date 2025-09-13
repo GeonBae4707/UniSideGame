@@ -3,15 +3,14 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rbody = null;   // Rigidbody2D 변수
-    private float axisH = 0.0f;         // 수평 입력 값                                        
-    public float speed = 3.0f;          // 이동 속도
+    private float axisH = 0.0f;         // 수평 입력 값
 
+    public float speed = 3.0f;
     public float jump = 9.0f;           // 점프력
     public LayerMask groundLayer;       // 착지할수 있는 레이어
     private bool goJump = false;        // 점프 개시 플래그
     private bool onGround = false;      // 지면에 서 있는 플래그
 
-    // 애니메이션 처리
     private Animator animator = null;       // 애니메이터
     public string stopAnime = "PlayerStop"; // 대기 애니메이션
     public string moveAnime = "PlayerMove"; // 이동 애니메이션
@@ -22,6 +21,7 @@ public class PlayerController : MonoBehaviour
     private string oldAnime = ""; // 이전에 재생 중이던 애니메이션
 
     public static string gameState = "playing"; // 게임 상태
+
 
     private void Start()
     {
@@ -43,24 +43,26 @@ public class PlayerController : MonoBehaviour
 
         axisH = Input.GetAxis("Horizontal");    // 수평 입력 값을 axisH 변수에 저장
 
-        // 방향 조절
         if (axisH > 0.0f)   // 오른쪽 이동
         {
-            //Debug.Log("오른쪽 이동");
             transform.localScale = new Vector2(1.0f, 1.0f);
         }
         else if (axisH < 0.0f)  // 왼쪽 이동
         {
-            //Debug.Log("왼쪽 이동");
             transform.localScale = new Vector2(-1.0f, 1.0f);        // 좌우 반전
         }
 
         // 캐릭터 점프하기
-        //if (Input.GetKeyDown(KeyCode.Space))
         if (Input.GetButtonDown("Jump"))
         {
             Jump();
         }
+    }
+
+    public void Jump()
+    {
+        goJump = true;  // 점프 개시 플래그 설정
+        Debug.Log("점프눌림!");
     }
 
     private void FixedUpdate()
@@ -87,10 +89,10 @@ public class PlayerController : MonoBehaviour
             goJump = false; // 점프 개시 플래그 해제
         }
 
-        if(onGround)
+        if (onGround)
         {
             // 지면 위
-            if( axisH == 0.0f)
+            if (axisH == 0.0f)
             {
                 nowAnime = stopAnime; // 대기 애니메이션
             }
@@ -105,17 +107,11 @@ public class PlayerController : MonoBehaviour
             nowAnime = jumpAnime; // 점프 애니메이션
         }
 
-        if( nowAnime != oldAnime )
+        if (nowAnime != oldAnime)
         {
             oldAnime = nowAnime;        // 이전 애니메이션 갱신
             animator.Play(nowAnime);    // 애니메이션 변경            
         }
-    }
-
-    public void Jump()
-    {
-        goJump = true;  // 점프 개시 플래그 설정
-        Debug.Log("점프눌림!");
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -131,7 +127,6 @@ public class PlayerController : MonoBehaviour
                 GameOver();
             }
         }
-
     }
 
     public void Goal()
@@ -144,14 +139,14 @@ public class PlayerController : MonoBehaviour
 
     public void GameOver()
     {
-        animator.Play(deadAnime); // 게임오버 애니메이션 재생        
+        animator.Play(deadAnime); // 게임오버 애니메이션 재생
 
         gameState = "gameover"; // 게임 상태 변경 (게임 오버)
         GameStop(); // 게임 정지
 
         GetComponent<CapsuleCollider2D>().enabled = false; // 충돌 비활성화
         // 위로 튕겨 오르게 하는 연출
-        rbody.AddForce(new Vector2(0.0f, 5.0f), ForceMode2D.Impulse); 
+        rbody.AddForce(new Vector2(0.0f, 5.0f), ForceMode2D.Impulse);
     }
 
     private void GameStop()

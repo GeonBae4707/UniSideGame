@@ -1046,4 +1046,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79660c0192a525e499953efc75264aed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: Stage2
+  sceneName: Result

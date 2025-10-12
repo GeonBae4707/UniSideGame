@@ -12,6 +12,8 @@ public class CannonController : MonoBehaviour
     GameObject gateObj;            // 대포 입구 오브젝트
     float passedTime = 0.0f;         // 경과 시간
 
+    public AudioClip soundCannon; // 대포 발사 사운드
+
     private void Start()
     {
         Transform tr = transform.Find("gate");      // 자신의 자식 오브젝트 중 "gate" 이름을 가진 오브젝트 탐색
@@ -35,6 +37,10 @@ public class CannonController : MonoBehaviour
                 Rigidbody2D rbody = obj.GetComponent<Rigidbody2D>();        // 포탄의 Rigidbody2D 컴포넌트 얻기
                 Vector2 v = new Vector2(fireSpeedX, fireSpeedY);    // 포탄에 가할 힘 벡터로 생성
                 rbody.AddForce(v, ForceMode2D.Impulse);         // 포탄에 힘 주기
+
+                AudioSource src = obj.AddComponent<AudioSource>(); // AudioSource 컴포넌트 추가
+                src.clip = soundCannon;        // 오디오 클립 로드
+                src.Play();
             }
         }
     }

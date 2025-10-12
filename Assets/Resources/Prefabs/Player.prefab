@@ -58,6 +58,9 @@ MonoBehaviour:
   jumpAnime: PlayerJump
   goalAnime: PlayerGoal
   deadAnime: PlayerOver
+  score: 0
+  soundJump: {fileID: 8300000, guid: 68e91a7c1c30578448a8fe13f0d7f167, type: 3}
+  soundRanding: {fileID: 8300000, guid: 378ff43fd03a14d40be36df4f384b138, type: 3}
 --- !u!212 &7358705428816398201
 SpriteRenderer:
   m_ObjectHideFlags: 0

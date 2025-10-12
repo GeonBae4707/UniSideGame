@@ -23,6 +23,10 @@ public class PlayerController : MonoBehaviour
     public static string gameState = "playing"; // 게임 상태
     public int score = 0; // 점수
 
+    public AudioClip soundJump; // 점프 사운드
+    public AudioClip soundRanding; // 착지 사운드
+    private bool isRandingSound = false;
+
     private void Start()
     {
         // 스크립트가 있는 게임 오브젝트의 Rigidbody2D 컴포넌트를 가져와 rbody 변수에 할당
@@ -75,6 +79,16 @@ public class PlayerController : MonoBehaviour
             transform.position - (transform.up * 0.1f),
             groundLayer);
 
+        if (onGround && isRandingSound)     // 지면에 서 있고 착지 사운드 재생 플래그가 설정되어 있으면
+        {
+            GameObject obj = new GameObject("RandingSound");         // 빈 게임 오브젝트 생성
+            AudioSource src = obj.AddComponent<AudioSource>();      // AudioSource 컴포넌트 추가
+            src.clip = soundRanding;        // 오디오 클립 로드
+            src.Play();
+            Destroy(obj, src.clip.length);      // 사운드 재생이 끝나면 오브젝트 파괴
+            isRandingSound = false;     // 착지 사운드 재생 플래그 해제
+        }
+
         if (onGround || axisH != 0) // 지면 위 or 속도가 0이 아님 / 속도 갱신하기
         {
             rbody.linearVelocity = new Vector2(axisH * speed, rbody.linearVelocity.y);
@@ -87,6 +101,14 @@ public class PlayerController : MonoBehaviour
             // ForceMode2D.Impulse: 순간적인 힘 적용 , ForceMode2D.Force: 지속적인 힘 적용
             rbody.AddForce(jumpPw, ForceMode2D.Impulse); // 순간적인 힘 적용
             goJump = false; // 점프 개시 플래그 해제
+
+            GameObject obj = new GameObject("JumpSound");         // 빈 게임 오브젝트 생성
+            AudioSource src = obj.AddComponent<AudioSource>();      // AudioSource 컴포넌트 추가
+            src.clip = soundJump;        // 오디오 클립 로드
+            src.Play();
+            Destroy(obj, src.clip.length);      // 사운드 재생이 끝나면 오브젝트 파괴
+
+            isRandingSound = true;          // 착지 사운드 재생 플래그 설정
         }
 
         if (onGround)

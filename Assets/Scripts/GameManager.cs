@@ -20,6 +20,9 @@ public class GameManager : MonoBehaviour
     public static int totalScore = 0;    // 총 점수
     public int stageScore = 0;          // 스테이지 점수
 
+    public AudioClip meGameOver;     // 게임 오버 사운드
+    public AudioClip meGameClear;    // 게임 클리어 사운드
+
     private void Start()
     {
         // 이미지 숨기기
@@ -72,6 +75,13 @@ public class GameManager : MonoBehaviour
             totalScore += stageScore;   // 스테이지 점수를 총 점수에 추가
             stageScore = 0;             // 스테이지 점수 초기화
             UpdateScore(); // 점수 갱신
+
+            AudioSource soundPlayer = GetComponent<AudioSource>();  // AudioSource 컴포넌트 가져오기
+            if(soundPlayer != null)
+            {
+                soundPlayer.Stop();               // 배경음악 정지
+                soundPlayer.PlayOneShot(meGameClear); // 게임 클리어 사운드 재생
+            }
         }
         else if (PlayerController.gameState == "gameover")
         {
@@ -87,6 +97,13 @@ public class GameManager : MonoBehaviour
             if (timeCnt != null)
             {
                 timeCnt.isTimeOver = true;  // 시간 카운트 중지
+            }
+
+            AudioSource soundPlayer = GetComponent<AudioSource>();  // AudioSource 컴포넌트 가져오기
+            if (soundPlayer != null)
+            {
+                soundPlayer.Stop();               // 배경음악 정지
+                soundPlayer.PlayOneShot(meGameOver); // 게임 오버 사운드 재생
             }
         }
         else if (PlayerController.gameState == "playing")
